@@ -1,10 +1,3 @@
-# cmps
-
-通过 tag 比较相同结构体不同示例大小的方法
-
-详见 cmps_test.go
-
-```go
 package cmps_test
 
 import (
@@ -57,4 +50,3 @@ func TestMain(t *testing.T) {
 	match := cmps.Compare(s1, s2)
 	fmt.Printf("match: %v\n", match)
 }
-```
