@@ -8,9 +8,9 @@ import (
 )
 
 type Student struct {
-	Name   string `cmps:"114"`
-	ID     int64  `cmps:"810"`
-	Male   bool   `cmps:"514"`
+	Name   string
+	ID     int64 `cmps:"810"`
+	Male   bool  `cmps:"514"`
 	Scores struct {
 		Chinese float64
 		Math    float64
@@ -41,7 +41,7 @@ func test2(t *testing.T) {
 
 func TestMain(t *testing.T) {
 	s1 := Student{
-		Name: "张三2",
+		Name: "张三1",
 		ID:   1,
 		Male: true,
 		Scores: struct {
@@ -51,7 +51,7 @@ func TestMain(t *testing.T) {
 		}{
 			Chinese: 100,
 			Math:    40,
-			English: 79,
+			English: 81,
 		},
 	}
 	s2 := Student{
@@ -67,6 +67,13 @@ func TestMain(t *testing.T) {
 			Math:    40,
 			English: 80,
 		},
+	}
+	mp := map[*Student]float64{
+		&s1: s1.Scores.Chinese + s1.Scores.English + s1.Scores.Math,
+		&s2: s2.Scores.Chinese + s2.Scores.English + s2.Scores.Math,
+	}
+	for _, s := range cmps.ValuesToKeys(mp) {
+		fmt.Printf("s: %v\n", s.Name)
 	}
 	match := cmps.Compare(s1, s2)
 	fmt.Printf("match: %v\n", match)
