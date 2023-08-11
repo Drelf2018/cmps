@@ -112,7 +112,7 @@ func Keys[M ~map[K]V, K comparable, V any](m M) []K {
 }
 
 func KeysToValues[M ~map[K]V, K comparable, V any](m M) []V {
-	r := make([]V, 0, len(m))
+	r := make([]V, len(m))
 	for i, k := range Keys(m) {
 		r[i] = m[k]
 	}
@@ -129,8 +129,8 @@ func Values[M ~map[K]V, K comparable, V any](m M) []V {
 }
 
 type reversedMap[K comparable, V any] struct {
-	k K
-	v V `cmps:"514"`
+	K K
+	V V `cmps:"514"`
 }
 
 func ValuesToKeys[M ~map[K]V, K comparable, V any](m M) []K {
@@ -139,9 +139,9 @@ func ValuesToKeys[M ~map[K]V, K comparable, V any](m M) []K {
 		rm = append(rm, reversedMap[K, V]{k, v})
 	}
 	Slice(rm)
-	s := make([]K, 0, len(m))
+	s := make([]K, len(m))
 	for i, r := range rm {
-		s[i] = r.k
+		s[i] = r.K
 	}
 	return s
 }
