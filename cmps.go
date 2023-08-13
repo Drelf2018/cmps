@@ -2,44 +2,8 @@ package cmps
 
 import (
 	"cmp"
-	"errors"
-	"reflect"
 	"slices"
 )
-
-var (
-	packages  = make(Packages)
-	NotStruct = errors.New("v's element type must be struct")
-	SameType  = errors.New("the type of y must same as x")
-)
-
-type Packages map[string]map[string]Type
-
-func (p Packages) Set(pkg, name string, typ reflect.Type) Type {
-	if p.Contain(pkg, name) {
-		return p[pkg][name]
-	}
-	c := Type{Type: typ, pkg: pkg, name: name}
-	c.parse()
-	p[pkg][name] = c
-	return c
-}
-
-func (p Packages) Contain(pkg, name string) bool {
-	types := p[pkg]
-	if types == nil {
-		types = make(map[string]Type)
-		p[pkg] = types
-		return false
-	}
-	_, ok := types[name]
-	return ok
-}
-
-func (p Packages) Get(v any) Type {
-	typ := checkValue(v)
-	return p.Set(typ.PkgPath(), typ.Name(), typ)
-}
 
 func compare[T cmp.Ordered](x, y any, t T) int {
 	return cmp.Compare(x.(T), y.(T))
@@ -90,11 +54,7 @@ func Compare[T any](x, y T) int {
 	case string:
 		return compare(x, y, t)
 	default:
-		typ := packages.Get(x)
-		if !typ.Equal(y) {
-			panic(SameType)
-		}
-		return typ.Compare(x, y)
+		return packages.Get(x).Compare(x, y, nil)
 	}
 }
 
@@ -102,46 +62,42 @@ func Slice[S ~[]E, E any](x S) {
 	slices.SortFunc(x, Compare)
 }
 
-func Keys[M ~map[K]V, K comparable, V any](m M) []K {
-	r := make([]K, 0, len(m))
-	for k := range m {
-		r = append(r, k)
-	}
-	Slice(r)
-	return r
+func SliceWithGroup[S ~[]E, E any](x S, g *Group) {
+	slices.SortFunc(x, func(a, b E) int { return packages.Get(a).Compare(a, b, g) })
 }
 
-func KeysToValues[M ~map[K]V, K comparable, V any](m M) []V {
-	r := make([]V, len(m))
-	for i, k := range Keys(m) {
-		r[i] = m[k]
-	}
-	return r
+type Map[K comparable, V any] struct {
+	K K `cmps:"114;groups:key"`
+	V V `cmps:"514;groups:value"`
 }
 
-func Values[M ~map[K]V, K comparable, V any](m M) []V {
-	r := make([]V, 0, len(m))
-	for _, v := range m {
-		r = append(r, v)
-	}
-	Slice(r)
-	return r
-}
-
-type reversedMap[K comparable, V any] struct {
-	K K
-	V V `cmps:"514"`
-}
-
-func ValuesToKeys[M ~map[K]V, K comparable, V any](m M) []K {
-	rm := make([]reversedMap[K, V], 0, len(m))
+func makeMaps[M ~map[K]V, K comparable, V any](m M) []Map[K, V] {
+	r := make([]Map[K, V], len(m))
+	i := 0
 	for k, v := range m {
-		rm = append(rm, reversedMap[K, V]{k, v})
+		r[i] = Map[K, V]{k, v}
+		i++
 	}
-	Slice(rm)
-	s := make([]K, len(m))
-	for i, r := range rm {
-		s[i] = r.K
+	return r
+}
+
+func Keys[M ~map[K]V, K comparable, V any](m M) []Map[K, V] {
+	r := makeMaps(m)
+	SliceWithGroup(r, &Group{Reserve: []string{"key"}})
+	return r
+}
+
+func Values[M ~map[K]V, K comparable, V any](m M) []Map[K, V] {
+	r := makeMaps(m)
+	SliceWithGroup(r, &Group{Reserve: []string{"value"}})
+	return r
+}
+
+func Contains[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool) bool {
+	for k, v := range m {
+		if f(k, v) {
+			return true
+		}
 	}
-	return s
+	return false
 }

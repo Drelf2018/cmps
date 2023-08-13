@@ -1,80 +1,160 @@
 package cmps_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/Drelf2018/cmps"
 )
 
+type Scores struct {
+	Chinese float64
+	Math    float64
+	English float64
+}
+
 type Student struct {
 	Name   string
 	ID     int64 `cmps:"810"`
 	Male   bool  `cmps:"514"`
-	Scores struct {
-		Chinese float64
-		Math    float64
-		English float64
-	} `cmps:"1919;Math,Chinese,English"`
+	Scores `cmps:"1919;fields:Math,Chinese,English"`
 }
 
-func test1(t *testing.T) {
-	fs := []cmps.Field{
-		{Cmps: 1.14},
-		{Cmps: 5.14},
-		{Cmps: 4},
-		{Cmps: 2},
-		{Cmps: 3},
-		{Cmps: 0},
+func testCmpsOrdered() bool {
+	// int
+	if cmps.Compare(1, 2) != -1 {
+		return false
 	}
-	fmt.Printf("fs: %v\n", fs)
-	cmps.Slice(fs)
-	fmt.Printf("fs: %v\n", fs)
+	if cmps.Compare(1, 1) != 0 {
+		return false
+	}
+	if cmps.Compare(2, 1) != 1 {
+		return false
+	}
+	// float
+	if cmps.Compare(1.5, 2.5) != -1 {
+		return false
+	}
+	if cmps.Compare(1.5, 1.5) != 0 {
+		return false
+	}
+	if cmps.Compare(2.5, 1.5) != 1 {
+		return false
+	}
+	// bool
+	if cmps.Compare(false, true) != -1 {
+		return false
+	}
+	if cmps.Compare(false, false) != 0 {
+		return false
+	}
+	if cmps.Compare(true, true) != 0 {
+		return false
+	}
+	if cmps.Compare(true, false) != 1 {
+		return false
+	}
+	// string
+	if cmps.Compare("1", "2") != -1 {
+		return false
+	}
+	if cmps.Compare("1", "1") != 0 {
+		return false
+	}
+	if cmps.Compare("2", "1") != 1 {
+		return false
+	}
+	return true
 }
 
-func test2(t *testing.T) {
-	fmt.Printf("cmps.Compare(true, true): %v\n", cmps.Compare(true, true))
-	fmt.Printf("cmps.Compare(true, false): %v\n", cmps.Compare(true, false))
-	fmt.Printf("cmps.Compare(false, true): %v\n", cmps.Compare(false, true))
-	fmt.Printf("cmps.Compare(false, false): %v\n", cmps.Compare(false, false))
-}
-
-func TestMain(t *testing.T) {
+func testStruct() bool {
 	s1 := Student{
 		Name: "张三1",
-		ID:   1,
-		Male: true,
-		Scores: struct {
-			Chinese float64
-			Math    float64
-			English float64
-		}{
-			Chinese: 100,
-			Math:    40,
-			English: 81,
+		ID:   2,
+		Male: false,
+		Scores: Scores{
+			Chinese: 90,
+			Math:    60,
+			English: 80,
 		},
 	}
 	s2 := Student{
 		Name: "张三2",
-		ID:   1,
-		Male: true,
-		Scores: struct {
-			Chinese float64
-			Math    float64
-			English float64
-		}{
-			Chinese: 100.00,
-			Math:    40,
+		ID:   2,
+		Male: false,
+		Scores: Scores{
+			Chinese: 90,
+			Math:    60,
 			English: 80,
 		},
 	}
-	mp := map[*Student]float64{
-		&s1: s1.Scores.Chinese + s1.Scores.English + s1.Scores.Math,
-		&s2: s2.Scores.Chinese + s2.Scores.English + s2.Scores.Math,
+	// Order: Male ID Math Chinese English
+	if cmps.Compare(s1, s2) != 0 {
+		return false
 	}
-	for _, s := range cmps.ValuesToKeys(mp) {
-		fmt.Printf("s: %v\n", s.Name)
+	s2.Male = true
+	if cmps.Compare(s1, s2) != -1 {
+		return false
 	}
-	match := cmps.Compare(s1, s2)
-	fmt.Printf("match: %v\n", match)
+	s1.Male = true
+	if cmps.Compare(s1, s2) != 0 {
+		return false
+	}
+	s2.Male = false
+	if cmps.Compare(s1, s2) != 1 {
+		return false
+	}
+	s1.Male = false
+	s1.ID = 1
+	if cmps.Compare(s1, s2) != -1 {
+		return false
+	}
+	s1.ID = 3
+	if cmps.Compare(s1, s2) != 1 {
+		return false
+	}
+	s1.ID = 2
+	s1.Math = 50
+	if cmps.Compare(s1, s2) != -1 {
+		return false
+	}
+	s1.Math = 70
+	if cmps.Compare(s1, s2) != 1 {
+		return false
+	}
+	s1.Math = 60
+	s1.Chinese = 80
+	if cmps.Compare(s1, s2) != -1 {
+		return false
+	}
+	s1.Chinese = 100
+	if cmps.Compare(s1, s2) != 1 {
+		return false
+	}
+	s1.Chinese = 90
+	s1.English = 70
+	if cmps.Compare(s1, s2) != -1 {
+		return false
+	}
+	s1.English = 90
+	if cmps.Compare(s1, s2) != 1 {
+		return false
+	}
+	return true
+}
+
+func TestMain(t *testing.T) {
+	i := 1
+	for ; i > 0; i-- {
+		if !testCmpsOrdered() {
+			break
+		}
+		if !testStruct() {
+			break
+		}
+	}
+	if i != 0 {
+		t.Fail()
+	} else {
+		cmps.Show()
+	}
 }
