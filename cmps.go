@@ -20,8 +20,8 @@ func cmpbool(x, y any) int {
 	return -1
 }
 
-func Compare[T any](x, y T) int {
-	var t T = x
+func Compare[E, T any](x E, y T) int {
+	var t E = x
 	switch t := any(t).(type) {
 	case bool:
 		return cmpbool(x, y)
@@ -56,6 +56,15 @@ func Compare[T any](x, y T) int {
 	default:
 		return packages.Get(x).Compare(x, y, nil)
 	}
+}
+
+func Search[S ~[]T, T any](x S, target T) (int, bool) {
+	return slices.BinarySearchFunc(x, target, Compare)
+}
+
+func Insert[S ~[]T, T any](x S, target T) S {
+	i, _ := Search(x, target)
+	return slices.Insert(x, i, target)
 }
 
 func Slice[S ~[]E, E any](x S) {

@@ -1,6 +1,7 @@
 package cmps_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/Drelf2018/cmps"
@@ -140,6 +141,24 @@ func testStruct() bool {
 		return false
 	}
 	return true
+}
+
+type Product struct {
+	Name  string `cmps:"1"`
+	Price string `cmps:"2"`
+}
+
+func TestInsert(t *testing.T) {
+	var ps []*Product
+	ps = cmps.Insert(ps, &Product{"2", "1.99"})
+	ps = cmps.Insert(ps, &Product{"2", "2.99"})
+	ps = cmps.Insert(ps, &Product{"1", "3.99"})
+	ps = cmps.Insert(ps, &Product{"1", "0.99"})
+	ps = cmps.Insert(ps, &Product{"3", "4.99"})
+	ps = cmps.Insert(ps, &Product{"1", "5.96"})
+	for _, p := range ps {
+		fmt.Printf("p: %v\n", p)
+	}
 }
 
 func TestMain(t *testing.T) {
