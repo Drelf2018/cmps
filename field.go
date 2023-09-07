@@ -24,14 +24,10 @@ func equip(x, y any) values {
 }
 
 type Field struct {
-	Index int
-	Name  string
-	Options
+	Index   int
+	Name    string
+	Options `cmps:"1"`
 	*Type
-}
-
-func (f Field) OrderBy() []string {
-	return []string{"Options"}
 }
 
 type Fields []*Field
@@ -43,6 +39,6 @@ func (fs *Fields) Read(s string) {
 func (fs *Fields) Scan(names []string) {
 	*fs = make([]*Field, len(names))
 	for i, name := range names {
-		(*fs)[i] = &Field{Name: name, Options: Options{Cmps: float64(i)}}
+		(*fs)[i] = &Field{Name: name, Options: Options{Cmps: float64(i), Order: 1}}
 	}
 }

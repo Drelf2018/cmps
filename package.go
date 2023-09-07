@@ -5,10 +5,6 @@ import (
 	"reflect"
 )
 
-type Ordered interface {
-	OrderBy() []string
-}
-
 var packages = make(Packages)
 
 type Packages map[string]map[string]Type
@@ -42,9 +38,6 @@ func (p Packages) Contain(pkg, name string) bool {
 
 func (p Packages) Get(v any) *Type {
 	typ := checkValue(v)
-	if v, ok := v.(Ordered); ok {
-		return p.Set(typ.PkgPath(), typ.Name(), typ, v.OrderBy()...)
-	}
 	return p.Set(typ.PkgPath(), typ.Name(), typ)
 }
 
