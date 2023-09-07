@@ -20,11 +20,8 @@ func (t *Type) Compare(x, y any, g *Group) int {
 			continue
 		}
 		v0, v1 := v.any(f.Index)
-		switch f.Type.Compare(v0, v1, g) {
-		case 1:
-			return 1
-		case -1:
-			return -1
+		if res := f.Type.Compare(v0, v1, g); res != 0 {
+			return f.Order * res
 		}
 	}
 	return 0
@@ -39,7 +36,7 @@ func (t *Type) findIndex(pkg, name string) {
 			continue
 		}
 		field := Field{Index: i, Name: v.Name}
-		field.Options.parse(tag)
+		field.Options.parse(tag, false)
 		field.Type = t.ComplexNew(pkg, name, v, field.Options.Fields...)
 		t.Fields = append(t.Fields, &field)
 	}
@@ -54,6 +51,9 @@ func (t *Type) toIndex(pkg, name string) {
 		v, ok := t.FieldByName(field.Name)
 		if !ok {
 			panic(fmt.Errorf("field: %v was not found", field.Name))
+		}
+		if tag := v.Tag.Get("cmps"); tag != "" {
+			field.Options.parse(tag, true)
 		}
 		field.Index = v.Index[0]
 		field.Type = t.ComplexNew(pkg, name, v)
@@ -80,12 +80,7 @@ func (t *Type) ComplexNew(pkg, name string, v reflect.StructField, fields ...str
 		if vt.PkgPath() == "" {
 			return t.EasyNew(pkg, name, v, fields...)
 		}
-		nv := reflect.New(vt).Interface()
-		if nv, ok := nv.(Ordered); ok {
-			return packages.Set(vt.PkgPath(), vt.Name(), vt, nv.OrderBy()...)
-		} else {
-			return packages.Set(vt.PkgPath(), vt.Name(), vt, fields...)
-		}
+		return packages.Set(vt.PkgPath(), vt.Name(), vt, fields...)
 	}
 	return nil
 }

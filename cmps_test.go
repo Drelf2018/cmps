@@ -8,8 +8,8 @@ import (
 )
 
 type Scores struct {
-	Chinese float64
-	Math    float64
+	Chinese float64 `cmps:"1;groups:chinese"`
+	Math    float64 `cmps:"2;groups:math"`
 	English float64
 }
 
@@ -145,7 +145,7 @@ func testStruct() bool {
 
 type Product struct {
 	Name  string `cmps:"1"`
-	Price string `cmps:"2"`
+	Price string `cmps:"2;order:desc"`
 }
 
 func TestInsert(t *testing.T) {
