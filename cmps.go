@@ -20,9 +20,10 @@ func cmpbool(x, y any) int {
 	return -1
 }
 
-func Compare[E, T any](x E, y T) int {
-	var t E = x
-	switch t := any(t).(type) {
+func Compare[T any](x, y T) int {
+	switch t := any(x).(type) {
+	default:
+		return packages.Get(x).Compare(x, y, nil)
 	case bool:
 		return cmpbool(x, y)
 	case int:
@@ -53,8 +54,6 @@ func Compare[E, T any](x E, y T) int {
 		return compare(x, y, t)
 	case string:
 		return compare(x, y, t)
-	default:
-		return packages.Get(x).Compare(x, y, nil)
 	}
 }
 
