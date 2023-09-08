@@ -61,9 +61,22 @@ func Search[S ~[]T, T any](x S, target T) (int, bool) {
 	return slices.BinarySearchFunc(x, target, Compare)
 }
 
+func SearchFunc[F any, S ~[]T, T *F](x S, f func(T)) (int, bool) {
+	var target T = new(F)
+	f(target)
+	return Search(x, target)
+}
+
 func Insert[S ~[]T, T any](x S, target T) S {
 	i, _ := Search(x, target)
 	return slices.Insert(x, i, target)
+}
+
+func Delete[S ~[]T, T any](x S, target T) S {
+	if i, ok := Search(x, target); ok {
+		return slices.Delete(x, i, i+1)
+	}
+	return x
 }
 
 func Slice[S ~[]E, E any](x S) {

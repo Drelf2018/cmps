@@ -155,7 +155,17 @@ func TestInsert(t *testing.T) {
 	ps = cmps.Insert(ps, &Product{"1", "3.99"})
 	ps = cmps.Insert(ps, &Product{"1", "0.99"})
 	ps = cmps.Insert(ps, &Product{"3", "4.99"})
-	ps = cmps.Insert(ps, &Product{"1", "5.96"})
+
+	i, ok := cmps.SearchFunc(ps, func(p *Product) {
+		p.Name = "2"
+		p.Price = "2.99"
+	})
+	fmt.Printf("i: %v ok: %v\n", i, ok)
+	for _, p := range ps {
+		fmt.Printf("p: %v\n", p)
+	}
+	fmt.Println()
+	ps = cmps.Delete(ps, &Product{"3", "4.99"})
 	for _, p := range ps {
 		fmt.Printf("p: %v\n", p)
 	}
