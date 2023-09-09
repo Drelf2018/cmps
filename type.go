@@ -71,7 +71,7 @@ func (t *Type) EasyNew(pkg, name string, v reflect.StructField, fields ...string
 	} else {
 		c.findIndex(pkg, vname)
 	}
-	packages[pkg][vname] = c
+	packages.Store(pkg+"|"+vname, &c)
 	return &c
 }
 
