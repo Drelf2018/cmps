@@ -1,6 +1,7 @@
 package cmps
 
 import (
+	"encoding/json"
 	"slices"
 	"sync"
 )
@@ -9,6 +10,10 @@ type SafeSlice[T any] struct {
 	// I stands for Items
 	I  []T
 	rw sync.RWMutex
+}
+
+func (s *SafeSlice[T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.I)
 }
 
 func (s *SafeSlice[T]) Index(t T) int {
