@@ -18,7 +18,7 @@ func (o *Options) parse(tag string, noCmps bool) {
 	if !noCmps {
 		cmps, err := strconv.ParseFloat(tags[0], 64)
 		if err != nil {
-			panic(fmt.Errorf("The tag: %v is not a number(%v)", tags[0], err))
+			panic(fmt.Errorf("the tag: %v is not a number(%v)", tags[0], err))
 		}
 		o.Cmps = cmps
 	}

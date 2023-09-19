@@ -1,12 +1,47 @@
 package cmps
 
 import (
-	"cmp"
-	"slices"
+	"golang.org/x/exp/slices"
 )
 
-func compare[T cmp.Ordered](x, y any, t T) int {
-	return cmp.Compare(x.(T), y.(T))
+type Ordered interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
+		~float32 | ~float64 |
+		~string
+}
+
+// Compare returns
+//
+//	-1 if x is less than y,
+//	 0 if x equals y,
+//	+1 if x is greater than y.
+//
+// For floating-point types, a NaN is considered less than any non-NaN,
+// a NaN is considered equal to a NaN, and -0.0 is equal to 0.0.
+func cmpCompare[T Ordered](x, y T) int {
+	xNaN := isNaN(x)
+	yNaN := isNaN(y)
+	if xNaN && yNaN {
+		return 0
+	}
+	if xNaN || x < y {
+		return -1
+	}
+	if yNaN || x > y {
+		return +1
+	}
+	return 0
+}
+
+// isNaN reports whether x is a NaN without requiring the math package.
+// This will always return false if T is not floating-point.
+func isNaN[T Ordered](x T) bool {
+	return x != x
+}
+
+func compare[T Ordered](x, y any, t T) int {
+	return cmpCompare(x.(T), y.(T))
 }
 
 func cmpbool(x, y any) int {
@@ -58,7 +93,7 @@ func Compare[T any](x, y T) int {
 }
 
 func Search[S ~[]T, T any](x S, target T) (int, bool) {
-	return slices.BinarySearchFunc(x, target, Compare)
+	return slices.BinarySearchFunc(x, target, func(t1, t2 T) int { return Compare(t1, t2) })
 }
 
 func SearchFunc[F any, S ~[]T, T *F](x S, f func(T)) (int, bool) {
@@ -80,7 +115,7 @@ func Delete[S ~[]T, T any](x S, target T) S {
 }
 
 func Slice[S ~[]E, E any](x S) {
-	slices.SortFunc(x, Compare)
+	slices.SortFunc(x, func(a, b E) int { return Compare(a, b) })
 }
 
 func SliceWithGroup[S ~[]E, E any](x S, g *Group) {

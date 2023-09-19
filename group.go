@@ -1,6 +1,6 @@
 package cmps
 
-import "slices"
+import "golang.org/x/exp/slices"
 
 type Group struct {
 	Reserve []string

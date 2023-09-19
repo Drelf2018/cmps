@@ -2,8 +2,9 @@ package cmps
 
 import (
 	"encoding/json"
-	"slices"
 	"sync"
+
+	"golang.org/x/exp/slices"
 )
 
 type SafeSlice[T any] struct {
