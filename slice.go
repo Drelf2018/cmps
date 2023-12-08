@@ -2,21 +2,22 @@ package cmps
 
 import (
 	"encoding/json"
-	"slices"
 	"sync"
+
+	"golang.org/x/exp/slices"
 )
 
-type SafeSlice[T any] struct {
+type Slice[T any] struct {
 	// I stands for Items
 	I  []T
 	rw sync.RWMutex
 }
 
-func (s *SafeSlice[T]) MarshalJSON() ([]byte, error) {
+func (s *Slice[T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.I)
 }
 
-func (s *SafeSlice[T]) Index(t T) int {
+func (s *Slice[T]) Index(t T) int {
 	s.rw.RLock()
 	defer s.rw.RUnlock()
 	if i, ok := Search(s.I, t); ok {
@@ -25,7 +26,7 @@ func (s *SafeSlice[T]) Index(t T) int {
 	return -1
 }
 
-func (s *SafeSlice[T]) Search(t T) (zero T) {
+func (s *Slice[T]) Search(t T) (zero T) {
 	s.rw.RLock()
 	defer s.rw.RUnlock()
 	if i, ok := Search(s.I, t); ok {
@@ -34,22 +35,28 @@ func (s *SafeSlice[T]) Search(t T) (zero T) {
 	return
 }
 
-func (s *SafeSlice[T]) Insert(t T) {
+func (s *Slice[T]) Insert(t T) {
 	s.rw.Lock()
 	defer s.rw.Unlock()
 	s.I = Insert(s.I, t)
 }
 
-func (s *SafeSlice[T]) Delete(t T) {
+func (s *Slice[T]) Delete(t T) bool {
 	s.rw.Lock()
 	defer s.rw.Unlock()
 	if i, ok := Search(s.I, t); ok {
 		s.I = slices.Delete(s.I, i, i+1)
+		return true
 	}
+	return false
 }
 
-func (s *SafeSlice[T]) Sort() {
+func (s *Slice[T]) Sort() {
 	s.rw.Lock()
 	defer s.rw.Unlock()
-	Slice(s.I)
+	Sort(s.I)
+}
+
+func NewSlice[T any](items ...T) *Slice[T] {
+	return &Slice[T]{I: items}
 }

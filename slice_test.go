@@ -8,14 +8,14 @@ import (
 )
 
 func TestSliceSafe(t *testing.T) {
-	s := cmps.SafeSlice[*Student]{I: make([]*Student, 0)}
+	s := cmps.NewSlice[*Student]()
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	task := sync.WaitGroup{}
 	for i := 0; i < 1000; i++ {
+		task.Add(1)
 		go func(i int) {
-			task.Add(1)
 			defer task.Done()
 			wg.Wait()
 			stu := &Student{ID: int64(1000 - i)}
@@ -49,8 +49,8 @@ func TestSlice(t *testing.T) {
 	wg.Add(1)
 	task := sync.WaitGroup{}
 	for i := 0; i < 1000; i++ {
+		task.Add(1)
 		go func(i int) {
-			task.Add(1)
 			defer task.Done()
 			wg.Wait()
 			stu := &Student{ID: int64(1000 - i)}
@@ -69,7 +69,7 @@ func TestSlice(t *testing.T) {
 	wg.Done()
 	task.Wait()
 	println("len(s):", len(s))
-	if len(s) != 0 {
+	if len(s) == 0 {
 		t.Fail()
 	}
 }

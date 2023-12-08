@@ -161,8 +161,6 @@ func TestMain(t *testing.T) {
 	}
 	if i != 0 {
 		t.Fail()
-	} else {
-		cmps.Show()
 	}
 }
 ```

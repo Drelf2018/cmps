@@ -137,10 +137,7 @@ func testStruct() bool {
 		return false
 	}
 	s1.English = 90
-	if cmps.Compare(s1, s2) != 1 {
-		return false
-	}
-	return true
+	return cmps.Compare(s1, s2) == 1
 }
 
 type Product struct {
@@ -183,7 +180,5 @@ func TestMain(t *testing.T) {
 	}
 	if i != 0 {
 		t.Fail()
-	} else {
-		cmps.Show()
 	}
 }

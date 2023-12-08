@@ -1,15 +1,45 @@
 package cmps
 
 import (
-	"cmp"
-	"slices"
+	"golang.org/x/exp/slices"
+
+	"golang.org/x/exp/constraints"
 )
 
-func compare[T cmp.Ordered](x, y any, t T) int {
-	return cmp.Compare(x.(T), y.(T))
+// Compare returns
+//
+//	-1 if x is less than y,
+//	 0 if x equals y,
+//	+1 if x is greater than y.
+//
+// For floating-point types, a NaN is considered less than any non-NaN,
+// a NaN is considered equal to a NaN, and -0.0 is equal to 0.0.
+func StdCompare[T constraints.Ordered](x, y T) int {
+	xNaN := isNaN(x)
+	yNaN := isNaN(y)
+	if xNaN && yNaN {
+		return 0
+	}
+	if xNaN || x < y {
+		return -1
+	}
+	if yNaN || x > y {
+		return +1
+	}
+	return 0
 }
 
-func cmpbool(x, y any) int {
+// isNaN reports whether x is a NaN without requiring the math package.
+// This will always return false if T is not floating-point.
+func isNaN[T constraints.Ordered](x T) bool {
+	return x != x
+}
+
+func compare[T constraints.Ordered](x, y any, t T) int {
+	return StdCompare(x.(T), y.(T))
+}
+
+func CmpBool(x, y any) int {
 	a := x.(bool)
 	if a == y.(bool) {
 		return 0
@@ -21,11 +51,15 @@ func cmpbool(x, y any) int {
 }
 
 func Compare[T any](x, y T) int {
+	return CompareUnsafe(x, y)
+}
+
+func CompareUnsafe(x, y any) int {
 	switch t := any(x).(type) {
 	default:
-		return packages.Get(x).Compare(x, y, nil)
+		return Tags(ref.Get(x)).Compare(x, y)
 	case bool:
-		return cmpbool(x, y)
+		return CmpBool(x, y)
 	case int:
 		return compare(x, y, t)
 	case int8:
@@ -58,7 +92,7 @@ func Compare[T any](x, y T) int {
 }
 
 func Search[S ~[]T, T any](x S, target T) (int, bool) {
-	return slices.BinarySearchFunc(x, target, Compare)
+	return slices.BinarySearchFunc(x, target, Compare[T])
 }
 
 func SearchFunc[F any, S ~[]T, T *F](x S, f func(T)) (int, bool) {
@@ -79,46 +113,6 @@ func Delete[S ~[]T, T any](x S, target T) S {
 	return x
 }
 
-func Slice[S ~[]E, E any](x S) {
-	slices.SortFunc(x, Compare)
-}
-
-func SliceWithGroup[S ~[]E, E any](x S, g *Group) {
-	slices.SortFunc(x, func(a, b E) int { return packages.Get(a).Compare(a, b, g) })
-}
-
-type Map[K comparable, V any] struct {
-	K K `cmps:"114;groups:key"`
-	V V `cmps:"514;groups:value"`
-}
-
-func makeMaps[M ~map[K]V, K comparable, V any](m M) []Map[K, V] {
-	r := make([]Map[K, V], len(m))
-	i := 0
-	for k, v := range m {
-		r[i] = Map[K, V]{k, v}
-		i++
-	}
-	return r
-}
-
-func Keys[M ~map[K]V, K comparable, V any](m M) []Map[K, V] {
-	r := makeMaps(m)
-	SliceWithGroup(r, &Group{Reserve: []string{"key"}})
-	return r
-}
-
-func Values[M ~map[K]V, K comparable, V any](m M) []Map[K, V] {
-	r := makeMaps(m)
-	SliceWithGroup(r, &Group{Reserve: []string{"value"}})
-	return r
-}
-
-func Contains[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool) bool {
-	for k, v := range m {
-		if f(k, v) {
-			return true
-		}
-	}
-	return false
+func Sort[S ~[]E, E any](x S) {
+	slices.SortFunc(x, Compare[E])
 }
