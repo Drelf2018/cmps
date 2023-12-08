@@ -1,2 +1,4 @@
-golang.org/x/exp v0.0.0-20230905200255-921286631fa9 h1:GoHiUyI/Tp2nVkLI2mCxVkOjsbSXD66ic0XW0js0R9g=
-golang.org/x/exp v0.0.0-20230905200255-921286631fa9/go.mod h1:S2oDrQGGwySpoQPVqRShND87VCbxmc6bL1Yd2oYrm6k=
+github.com/Drelf2018/TypeGo v0.7.0 h1:xGq2frpqkAvs/+cnaJp29h4po5S8fQf6GilgQd8rcJs=
+github.com/Drelf2018/TypeGo v0.7.0/go.mod h1:hpA8NTaInfI25zNS0P4irE4Hk+kuHFmVPJxco7NhaPM=
+golang.org/x/exp v0.0.0-20231127185646-65229373498e h1:Gvh4YaCaXNs6dKTlfgismwWZKyjVZXwOPfIyUaqU3No=
+golang.org/x/exp v0.0.0-20231127185646-65229373498e/go.mod h1:iRJReGqOEeBhDZGkGbynYwcHlctCvnjTYIamk7uXpHI=

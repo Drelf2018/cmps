@@ -8,7 +8,7 @@ import (
 )
 
 func TestSliceSafe(t *testing.T) {
-	s := cmps.SafeSlice[*Student]{I: make([]*Student, 0)}
+	s := cmps.NewSlice[*Student]()
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
