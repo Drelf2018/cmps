@@ -121,4 +121,4 @@ func (t Tags) Compare(x, y any) int {
 	return 0
 }
 
-var ref = Reflect.NewMap[Reflect.TagParser[Tag]]("cmps")
+var ref = Reflect.NewMap[Reflect.TagParser[Tag], []*Tag]("cmps")
